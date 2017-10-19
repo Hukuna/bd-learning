@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.hukuna.bd.BD_Models</groupId>
+    <artifactId>00.Parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>../01.Application</module>
+    </modules>
+
+    <properties>
+        <!--maven-plugins编码格式-->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!--maven插件管理版本-->
+        <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
+        <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
+        <tomcat7-maven-plugin.version>2.2</tomcat7-maven-plugin.version>
+
+        <!-- 大数据版本 -->
+        <hadoop.version>2.7.3</hadoop.version>
+        <spark.version>2.1.0</spark.version>
+        <kafka.version>0.10.2.0</kafka.version>
+        <scala.version>2.12.1</scala.version>
+
+        <!--日志管理版本-->
+        <logback.version>1.2.3</logback.version>
+        <slf4j.version>1.7.25</slf4j.version>
+        <log4j.version>2.8.1</log4j.version>
+        <commons-logging.version>1.2</commons-logging.version>
+
+        <!-- java -->
+        <java.version>1.8</java.version>
+        <junit.version>4.12</junit.version>
+        <commons-lang3.version>3.5</commons-lang3.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-common</artifactId>
+                <version>${hadoop.version}</version>
+                <scope>${scope.version}</scope>
+            </dependency>
+
+            <!-- 2.x版本中hadoop-core被分散成几个小的jar包-->
+            <!-- <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-core</artifactId>
+                <version>1.1.2</version>
+            </dependency>-->
+
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-client</artifactId>
+                <version>${hadoop.version}</version>
+                <scope>${scope.version}</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-mapreduce-client-core</artifactId>
+                <version>${hadoop.version}</version>
+                <scope>${scope.version}</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+        </dependencies>
+
+    </dependencyManagement>
+
+    <build>
+        <resources>
+            <!-- 将所有src/main.java目录下的所有xml文件放到classpath目录下/-->
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+            <!-- 将src/main/resources目录下的所有文件放到classpath目录下/-->
+            <resource>
+                <directory>src/main/resources</directory>
+                <!-- 不写includes默认就是全部文件/-->
+            </resource>
+            <resource>
+                <directory>profiles/${profiles.active}</directory>
+            </resource>
+        </resources>
+
+        <!-- 半继承 -->
+        <pluginManagement>
+            <plugins>
+                <!-- compiler插件, 设定JDK版本 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <showWarnings>true</showWarnings>
+                    </configuration>
+                </plugin>
+
+                <!-- 跳过单元测试 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
+                </plugin>
+
+                <!-- assembly插件，将所有依赖的jar包全部打入同一个大jar包中 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven-assembly-plugin.version}</version>
+                    <configuration>
+                        <!--指定大jar包后缀-->
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <!--指定大jar包的主类名-->
+                        <!--<archive>-->
+                        <!--<manifest>-->
+                        <!--<mainClass>TopologyMain</mainClass>-->
+                        <!--</manifest>-->
+                        <!--</archive>-->
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>make-assembly</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>localhost</id>
+            <properties>
+                <java.version>1.8</java.version>
+                <profiles.active>localhost</profiles.active>
+                <scope.version>compile</scope.version>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+
+        <profile>
+            <id>development</id>
+            <properties>
+                <java.version>1.8</java.version>
+                <profiles.active>development</profiles.active>
+                <!--集群环境中包含有一些jar包，因此打正式包的时候可以用provided-->
+                <scope.version>provided</scope.version>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>production</id>
+            <properties>
+                <java.version>1.8</java.version>
+                <profiles.active>production</profiles.active>
+                <!--集群环境中包含有一些jar包，因此打正式包的时候可以用provided-->
+                <scope.version>provided</scope.version>
+            </properties>
+        </profile>
+    </profiles>
+</project>
